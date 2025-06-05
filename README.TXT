@@ -8,7 +8,7 @@ Interactive simulator of Krynn’s three magical moons, inspired by the *Dragonl
 
 ## 📺 Live Demo / Demostración en Vivo
 
-👉 [https://akniz-rdg.github.io/moonsofkrynn/](https://akniz-rdg.github.io/moonsofkrynn/)
+👉 [https://akniz-rdg.github.io/moonsofkrynn/]
 
 ---
 
@@ -41,4 +41,4 @@ Cada 1008 días, las tres lunas se alinean, evento que representa una **converge
 
 ### 📦 Opción 1: Visualizar online
 Abre este enlace:  
-👉 [https://akniz-rdg.github.io/moonsofkrynn/](https://akniz-rdg.github.io/moonsofkrynn/)
+👉 [https://akniz-rdg.github.io/moonsofkrynn/]
