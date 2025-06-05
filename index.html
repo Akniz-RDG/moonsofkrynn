@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lunas de Krynn con Fases</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: black;
+      overflow: hidden;
+      font-family: sans-serif;
+      color: white;
+    }
+
+    .estrella {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: parpadeo 2s infinite;
+    }
+
+    .planeta {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, #003366 40%, #001122);
+      border-radius: 50%;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 40px rgba(0, 128, 255, 0.4);
+      z-index: 5;
+    }
+
+    .luna {
+      position: absolute;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+      transition: all 0.4s ease;
+      z-index: 10;
+    }
+
+    .luna-blanca {
+      width: 80px;
+      height: 80px;
+      background: white;
+    }
+
+    .luna-roja {
+      width: 50px;
+      height: 50px;
+      background: red;
+    }
+
+    .luna-negra {
+      width: 30px;
+      height: 30px;
+      background: gray;
+      border: 1px solid #333;
+    }
+
+    @keyframes parpadeo {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 0.1; }
+    }
+
+    #control-dia {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      text-align: center;
+    }
+
+    input[type="range"] {
+      width: 300px;
+    }
+
+    #mensaje-alineacion {
+      position: absolute;
+      top: 20px;
+      width: 100%;
+      text-align: center;
+      font-size: 1.5rem;
+      color: gold;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      display: none;
+      z-index: 20;
+    }
+  </style>
+</head>
+<body>
+
+<div id="mensaje-alineacion">¡Las tres lunas de Krynn están alineadas!</div>
+<div class="planeta" id="krynn"></div>
+
+<div id="control-dia">
+  <label>Día de Krynn: <span id="valor-dia"></span></label><br>
+  <input type="range" id="sliderDia" min="1" max="1008" value="1">
+</div>
+
+<script>
+  const cantidadEstrellas = 200;
+  for (let i = 0; i < cantidadEstrellas; i++) {
+    const estrella = document.createElement("div");
+    estrella.classList.add("estrella");
+    const x = Math.random() * 100;
+    const y = Math.random() * 100;
+    const tamaño = Math.random() * 2 + 1;
+
+    estrella.style.left = `${x}%`;
+    estrella.style.top = `${y}%`;
+    estrella.style.width = `${tamaño}px`;
+    estrella.style.height = `${tamaño}px`;
+    document.body.appendChild(estrella);
+  }
+
+  const lunas = {
+    blanca: crearLuna("luna-blanca"),
+    roja: crearLuna("luna-roja"),
+    negra: crearLuna("luna-negra")
+  };
+
+  function crearLuna(clase) {
+    const luna = document.createElement("div");
+    luna.classList.add("luna", clase);
+    document.body.appendChild(luna);
+    return luna;
+  }
+
+  function posicionarLunas(dia) {
+    document.getElementById("valor-dia").innerText = dia;
+
+    const centroX = window.innerWidth / 2;
+    const centroY = window.innerHeight / 2;
+
+    const ciclos = {
+      blanca: 36,
+      roja: 28,
+      negra: 8
+    };
+
+    const radios = {
+      blanca: 200,
+      roja: 140,
+      negra: 90
+    };
+
+    const posiciones = {};
+
+    Object.entries(lunas).forEach(([nombre, el]) => {
+      const ciclo = ciclos[nombre];
+      const radio = radios[nombre];
+
+      const angulo = (dia % ciclo) / ciclo * 2 * Math.PI;
+
+      const x = centroX + Math.cos(angulo) * radio - el.offsetWidth / 2;
+      const y = centroY + Math.sin(angulo) * radio - el.offsetHeight / 2;
+
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+
+      posiciones[nombre] = angulo;
+
+      aplicarFaseLunar(el, angulo);
+    });
+
+    verificarAlineacion(posiciones);
+  }
+
+  function aplicarFaseLunar(el, angulo) {
+    // El Sol está a la izquierda (ángulo = π)
+    const fase = Math.cos(angulo - Math.PI); // 1 = llena, -1 = nueva
+
+    const sombra = `
+      radial-gradient(circle at ${fase > 0 ? '0%' : '100%'}, 
+      rgba(0,0,0,0.8) ${Math.abs(fase)*100}%, 
+      transparent ${Math.abs(fase)*100 + 10}%)
+    `;
+    el.style.backgroundImage = sombra;
+  }
+
+  function verificarAlineacion(pos) {
+    const umbral = 0.15;
+
+    const delta1 = Math.abs(normalizar(pos.blanca - pos.roja));
+    const delta2 = Math.abs(normalizar(pos.roja - pos.negra));
+    const delta3 = Math.abs(normalizar(pos.blanca - pos.negra));
+
+    if (delta1 < umbral && delta2 < umbral && delta3 < umbral) {
+      document.getElementById("mensaje-alineacion").style.display = "block";
+    } else {
+      document.getElementById("mensaje-alineacion").style.display = "none";
+    }
+  }
+
+  function normalizar(angle) {
+    return Math.abs((angle + Math.PI) % (2 * Math.PI) - Math.PI);
+  }
+
+  const slider = document.getElementById("sliderDia");
+  slider.addEventListener("input", () => {
+    const dia = parseInt(slider.value);
+    posicionarLunas(dia);
+  });
+
+  posicionarLunas(parseInt(slider.value));
+</script>
+
+</body>
+</html>
